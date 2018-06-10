@@ -1,0 +1,68 @@
+Sentiment Analysis using nlp
+
+Input is keras imdb dataset
+Dataset contains word frequency rank representation of reviews (Most frequent is ranked 1)
+25000 train and test reviews each
+
+Dimension of train set:-
+	25000*250 (250 is padding maxlen)
+
+Dataset is list of reviews
+Each review is of different lengths
+So we pad sequences
+	In padding we limit the maximum length of each review
+	In case a review is smaller than the maxlen, we pad it with 0
+We take a sequential model (Optionally we also have Recurrent)
+
+Embedding layer:-
+	Convert words to vector by learning features
+	input_dim = number of distinct words in the training set + 1
+	output_dim = size of the embedding vectors
+	input_len = size of each sequence
+	
+	The weights of the Embedding layer are of the shape (vocabulary_size, embedding_dimension). For each training sample, its input are integers, which represent certain words. The integers are in the range of the vocabulary size. The Embedding layer transforms each integer i into the ith line of the embedding weights matrix.
+	In order to quickly do this as a matrix multiplication, the input integers are not stored as a list of integers but as a one-hot matrix. Therefore the input shape is (nb_words, vocabulary_size) with one non-zero value per line. If you multiply this by the embedding weights, you get the output in the shape
+	(nb_words, vocab_size) x (vocab_size, embedding_dim) = (nb_words, embedding_dim)
+	So with a simple matrix multiplication you transform all the words in a sample into the corresponding word embeddings.
+	
+	This is used so that distance between the vectors of 2 words gives a semantic relationship
+	
+Conv1d:-
+	One dimensional convolution (temporal)
+	stride and padding also apply
+	kernel is also 1d
+	We do 1d convolution as 1 word vector has no relation to other word vector
+	Output size is same as input size
+	Activation is relu
+	Number of channels in filter = Number of channels in input
+	Number of channels in output = Number of filters
+	
+MaxPool1d:-
+	One dimensional max pooling (window is 1d)
+	pool_size = size of window
+	Number of channels in output = Number of channels in input
+	Max pooling does not affect channels
+	
+Flatten:-
+	Convert 3d matrix (num_samples, words_in_sample, channels) to 2d matrix
+	Flatten last 2 dimensions
+	
+Dense:-
+	Fully Connected layer with 250 neurons
+	Output Dimension = (num_samples , words_in_sample*channels) becomes (num_samples, 250)
+	weight matrix dimension = (words_in_sample, 250)
+	Also include 250 biases (one for each neuron)
+	Activation is relu
+	Last layer has only one output neuron
+	
+Initializer:-
+	Xavier Normal Initializer
+	(standard deviation) stddev = sqrt(2/(fan_in + fan_out))
+	Normal distribution is centered at zero (mean  = 0)
+	
+	Xavier Uniform Initializer (each value has equal probablity)
+	select values from [-limit, limit]
+	limit = sqrt(6/(fan_in + fan_out))
+	
+	Orthogonal matrix
+	It is a matrix whose columns and rows are orthonormal vectors (dot product of 2 rows is 0 and magnitude of each vector is 1)
